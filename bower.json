@@ -1,0 +1,25 @@
+{
+  "name": "sunucu",
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "webix": "^4.0.8",
+    "codemirror": "^5.19.0",
+    "flow.js": "^2.11.2",
+    "moment": "^2.15.2",
+    "moment-timezone": "^0.5.9",
+    "reveal-js": "^2.6.2",
+    "gridster": "^0.5.6",
+    "jquery": "^3.1.1",
+    "masonry": "^4.1.1"
+  }
+}
