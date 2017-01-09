@@ -36,7 +36,8 @@ var MetaInspector = require('node-metainspector')
 //--------------------------------------------------------------------------------------------------------------------------------
 var MongoClient = require('mongodb').MongoClient;
 var MongoObjectID = require('mongodb').ObjectID;
-var mongodbUrl = 'mongodb://hsyn:03014123@139.59.156.195:27017/kamus';
+//var mongodbUrl = 'mongodb://hsyn:03014123@139.59.156.195:27017/kamus';
+var mongodbUrl = 'mongodb://127.0.0.1:27017/kamus';
 
 /*===========================================================================
 	Prototypes 
@@ -243,20 +244,20 @@ app.post('/raspi', function(req, res){
 /*===========================================================================
 	Kamus - Projeler
 ===========================================================================*/
-app.get('/project', function(req, res){
-    console.log("GET: /project")
+app.get('/projeler', function(req, res){
+    console.log("GET: /projeler")
     MongoClient.connect(mongodbUrl, function(err, db) {
-        db.collection('project').find(req.query).toArray(function(err,data){
+        db.collection('projeler').find(req.query).toArray(function(err,data){
             res.send(data);
             db.close()
         })
     })		
 })
 
-app.get('/project/gitlog', function(req, res){
-    console.log("GET: /project/gitlog")
+app.get('/projeler/gitlog', function(req, res){
+    console.log("GET: /projeler/gitlog")
     var options = {
-        repo:'/home/hsyn/'+req.query.project,
+        repo:'/home/his/Projeler/'+req.query.projeler,
         //number:5,
         fields:['hash','subject','authorDateRel']
     }
@@ -344,12 +345,12 @@ app.get('/tool/chart/draw', function(req, res){
     })
 })
 /*===========================================================================
-	Kamus - links
+	KAMUS - Bağlantılar
 ===========================================================================*/
-app.get('/link', function(req, res){
-    console.log("GET: /link")
+app.get('/baglantilar', function(req, res){
+    console.log("GET: /baglantilar")
     MongoClient.connect(mongodbUrl, function(err, db) {
-        db.collection('link').find(req.query).toArray(function(err,data){
+        db.collection('baglantilar').find(req.query).toArray(function(err,data){
             for (var i = 0; i < data.length; i++){
                 data[i].id = data[i]._id
                 delete data[i]._id
@@ -364,10 +365,10 @@ app.get('/link', function(req, res){
     })		
 });
 
-app.post('/link', function(req, res){
-    console.log("POST: /link")
+app.post('/baglantilar', function(req, res){
+    console.log("POST: /baglantilar")
     MongoClient.connect(mongodbUrl, function(err, db) {
-        db.collection('link').insertOne(req.body,function(err){
+        db.collection('baglantilar').insertOne(req.body,function(err){
             if (err) return res.send({ status:"error" });
             res.send({});
             db.close()
@@ -375,20 +376,20 @@ app.post('/link', function(req, res){
     })		
 });
 
-app.put('/link/:_id', function(req, res){
-    console.log("PUT: /link")
+app.put('/baglantilar/:_id', function(req, res){
+    console.log("PUT: /baglantilar")
     MongoClient.connect(mongodbUrl, function(err, db) {
-        db.collection('link').updateOne({_id:MongoObjectID(req.params._id)}, req.body,function(err){
+        db.collection('baglantilar').updateOne({_id:MongoObjectID(req.params._id)}, req.body,function(err){
             if (err) return res.send({ status:"error" });
             res.send({});
             db.close()
         })
     })		
 });
-app.delete('/link/:_id', function(req, res){
-    console.log("DEL: /link")
+app.delete('/baglantilar/:_id', function(req, res){
+    console.log("DEL: /baglantilar")
     MongoClient.connect(mongodbUrl, function(err, db) {
-        db.collection('link').deleteOne({_id:MongoObjectID(req.params._id)},function(err){
+        db.collection('baglantilar').deleteOne({_id:MongoObjectID(req.params._id)},function(err){
             if (err) return res.send({ status:"error" });
             res.send({});
             db.close()
@@ -396,8 +397,8 @@ app.delete('/link/:_id', function(req, res){
     })		
 });
 
-app.get('/link/title', function(req, res){
-    console.log("GET: /link/title")
+app.get('/baglantilar/title', function(req, res){
+    console.log("GET: /baglantilar/title")
 	var client = new MetaInspector(req.query.url, { timeout: 5000 });
 	client.on("fetch", function(){
 		res.send(client.title);
@@ -412,10 +413,10 @@ app.get('/link/title', function(req, res){
 //===========================================================================
 // KAMUS - Belgeler
 //===========================================================================
-app.get('/doc', function(req, res){	
-    console.log("GET: /doc")
+app.get('/belgeler', function(req, res){	
+    console.log("GET: /belgeler")
     MongoClient.connect(mongodbUrl, function(err, db) {
-        db.collection('doc').find(req.query).toArray(function(err,data){
+        db.collection('belgeler').find(req.query).toArray(function(err,data){
             res.send(data);
             db.close()
         })

@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html>
+    <head><!--- Header --->
+        <title>Belgeler</title>
+        <!--Webix-->
+        <link rel="stylesheet" href="/webix/codebase/skins/compact.css" type="text/css" charset="utf-8">
+        <script src="/webix/codebase/webix.js" type="text/javascript" charset="utf-8"></script>
+        <!--Flow.js-->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+        <script src="/flow.js/dist/flow.js"></script>
+        <link rel="stylesheet" type="text/css" href="/upload/style.css" />
+        <!--Moment-->
+        <script src="/moment/moment.js"></script>
+        <script src="/moment/locale/tr.js"></script>
+        <script src="/moment-timezone/moment-timezone.js"></script>
+    </head>
+
+    <style><!--- Style --->
+        .webix_property_value {
+            line-height: 24px;
+        }
+        .webix_property_label {
+            line-height: 24px;
+        }
+        .webix_accordionitem_header{
+            height: 24px;
+        },
+        .mybar.webix_all_tabs{height:23px;display:table;}
+    </style>
+
+    <body><!--- Body --->
+        <div id="frame">
+
+            <div class="flow-drop" ondragenter="jQuery(this).addClass('flow-dragover');" ondragend="jQuery(this).removeClass('flow-dragover');" ondrop="jQuery(this).removeClass('flow-dragover');">
+                Drop files here to upload or <a class="flow-browse-folder"><u>select folder</u></a> or <a class="flow-browse"><u>select from your computer</u></a> or <a class="flow-browse-image"><u>select images</u></a>
+            </div>
+
+            <div class="flow-progress">
+                <table>
+                    <tr>
+                        <td width="100%"><div class="progress-container"><div class="progress-bar"></div></div></td>
+                        <td class="progress-text" nowrap="nowrap"></td>
+                        <td class="progress-pause" nowrap="nowrap">
+                            <a href="#" onclick="r.upload(); return(false);" class="progress-resume-link"><img src="upload/resume.png" title="Resume upload" /></a>
+                            <a href="#" onclick="r.pause(); return(false);" class="progress-pause-link"><img src="upload/pause.png" title="Pause upload" /></a>
+                            <a href="#" onclick="r.cancel(); return(false);" class="progress-cancel-link"><img src="upload/cancel.png" title="Cancel upload" /></a>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <ul class="flow-list"></ul>
+        </div>
+
+        <script type="text/javascript" charset="utf-8">
+            // =====================================================
+            //   Flow.js
+            // =====================================================
+            // Flow.js
+            var uploader = new Flow({
+                target: '/upload',
+                chunkSize: 1024*1024,
+            });			
+            // Flow.js isn't supported, fall back on a different method
+            if (!uploader.support) {
+                alert("Dosya yükleyici desteklenmiyor");
+            }			
+            if (!uploader.supportDirectory) {
+                alert("Klasör yükleyici desteklenmiyor");
+            }			
+            (function () {
+                var r = new Flow({
+                    target: '/upload',
+                    chunkSize: 1024*1024,
+                    testChunks: false
+                });
+                // Flow.js isn't supported, fall back on a different method
+                if (!r.support) {
+                    $('.flow-error').show();
+                    return ;
+                }
+                // Show a place for dropping/selecting files
+                $('.flow-drop').show();
+                r.assignDrop($('.flow-drop')[0]);
+                r.assignBrowse($('.flow-browse')[0]);
+                r.assignBrowse($('.flow-browse-folder')[0], true);
+                r.assignBrowse($('.flow-browse-image')[0], false, false, {accept: 'image/*'});
+
+                // Handle file add event
+                r.on('fileAdded', function(file){
+                    // Show progress bar
+                    $('.flow-progress, .flow-list').show();
+                    // Add the file to the list
+                    $('.flow-list').append(
+                        '<li class="flow-file flow-file-'+file.uniqueIdentifier+'">' +
+                        'Uploading <span class="flow-file-name"></span> ' +
+                        '<span class="flow-file-size"></span> ' +
+                        '<span class="flow-file-progress"></span> ' +
+                        '<a href="" class="flow-file-download" target="_blank">' +
+                        'Download' +
+                        '</a> ' +
+                        '<span class="flow-file-pause">' +
+                        ' <img src="upload/pause.png" title="Pause upload" />' +
+                        '</span>' +
+                        '<span class="flow-file-resume">' +
+                        ' <img src="upload/resume.png" title="Resume upload" />' +
+                        '</span>' +
+                        '<span class="flow-file-cancel">' +
+                        ' <img src="upload/cancel.png" title="Cancel upload" />' +
+                        '</span>'
+                    );
+                    var $self = $('.flow-file-'+file.uniqueIdentifier);
+                    $self.find('.flow-file-name').text(file.relativePath);
+                    $self.find('.flow-file-size').text(readablizeBytes(file.size));
+                    $self.find('.flow-file-download').attr('href', '/download/' + file.uniqueIdentifier).hide();
+                    $self.find('.flow-file-pause').on('click', function () {
+                        file.pause();
+                        $self.find('.flow-file-pause').hide();
+                        $self.find('.flow-file-resume').show();
+                    });
+                    $self.find('.flow-file-resume').on('click', function () {
+                        file.resume();
+                        $self.find('.flow-file-pause').show();
+                        $self.find('.flow-file-resume').hide();
+                    });
+                    $self.find('.flow-file-cancel').on('click', function () {
+                        file.cancel();
+                        $self.remove();
+                    });
+                });
+                r.on('filesSubmitted', function(file) {
+                    r.upload();
+                });
+                r.on('complete', function(){
+                    // Hide pause/resume when the upload has completed
+                    $('.flow-progress .progress-resume-link, .flow-progress .progress-pause-link').hide();
+                });
+                r.on('fileSuccess', function(file,message){
+                    var $self = $('.flow-file-'+file.uniqueIdentifier);
+                    // Reflect that the file upload has completed
+                    $self.find('.flow-file-progress').text('(completed)');
+                    $self.find('.flow-file-pause, .flow-file-resume').remove();
+                    $self.find('.flow-file-download').attr('href', '/upload/download/' + file.uniqueIdentifier).show();
+                });
+                r.on('fileError', function(file, message){
+                    // Reflect that the file upload has resulted in error
+                    $('.flow-file-'+file.uniqueIdentifier+' .flow-file-progress').html('(file could not be uploaded: '+message+')');
+                });
+                r.on('fileProgress', function(file){
+                    // Handle progress for both the file and the overall upload
+                    $('.flow-file-'+file.uniqueIdentifier+' .flow-file-progress')
+                        .html(Math.floor(file.progress()*100) + '% '
+                              + readablizeBytes(file.averageSpeed) + '/s '
+                              + secondsToStr(file.timeRemaining()) + ' remaining') ;
+                    $('.progress-bar').css({width:Math.floor(r.progress()*100) + '%'});
+                });
+                r.on('uploadStart', function(){
+                    // Show pause, hide resume
+                    $('.flow-progress .progress-resume-link').hide();
+                    $('.flow-progress .progress-pause-link').show();
+                });
+                r.on('catchAll', function() {
+                    console.log.apply(console, arguments);
+                });
+                window.r = {
+                    pause: function () {
+                        r.pause();
+                        // Show resume, hide pause
+                        $('.flow-file-resume').show();
+                        $('.flow-file-pause').hide();
+                        $('.flow-progress .progress-resume-link').show();
+                        $('.flow-progress .progress-pause-link').hide();
+                    },
+                    cancel: function() {
+                        r.cancel();
+                        $('.flow-file').remove();
+                    },
+                    upload: function() {
+                        $('.flow-file-pause').show();
+                        $('.flow-file-resume').hide();
+                        r.resume();
+                    },
+                    flow: r
+                };
+            })();
+
+            function readablizeBytes(bytes) {
+                var s = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB'];
+                var e = Math.floor(Math.log(bytes) / Math.log(1024));
+                return (bytes / Math.pow(1024, e)).toFixed(2) + " " + s[e];
+            }
+            function secondsToStr (temp) {
+                function numberEnding (number) {
+                    return (number > 1) ? 's' : '';
+                }
+                var years = Math.floor(temp / 31536000);
+                if (years) {
+                    return years + ' year' + numberEnding(years);
+                }
+                var days = Math.floor((temp %= 31536000) / 86400);
+                if (days) {
+                    return days + ' day' + numberEnding(days);
+                }
+                var hours = Math.floor((temp %= 86400) / 3600);
+                if (hours) {
+                    return hours + ' hour' + numberEnding(hours);
+                }
+                var minutes = Math.floor((temp %= 3600) / 60);
+                if (minutes) {
+                    return minutes + ' minute' + numberEnding(minutes);
+                }
+                var seconds = temp % 60;
+                return seconds + ' second' + numberEnding(seconds);
+            }           
+
+            /*=====================================================
+				Configuration
+			=====================================================*/
+            /*------------------------------------------------------------
+				Configuration: Projects
+			-------------------------------------------------------------*/
+            var projects = ["Hepsi"]
+            var subProjects = {}
+            webix.ajax().get("/project",{itype:"data"},function(t,d,x){
+                projects = []
+                d.json().forEach(function(item){
+                    projects.push(item.value)
+                    if(item.data){
+                        subProjects[item.value] = []
+                        item.data.forEach(function(subItem){subProjects[item.value].push(subItem)})
+                        subProjects[item.value].push("Hepsi")
+                    }
+                })
+                $$("projectSelectRadio").define("options",projects.concat("Hepsi"))
+                $$("projectSelectRadio").refresh()
+            })
+            /*------------------------------------------------------------
+				Configuration:categorys
+			-------------------------------------------------------------*/
+            var categorys = ["Literatür","El Kitabı","Kodlama","Benzetim","Ölçüm","Modelleme","Evrak","Ürün","Medya","Program","Hepsi"]
+            var subCategorys = {"":[],
+                                "El Kitabı":["Kodlama","Elektronik","Elektromanyetik","Hepsi"],
+                                "Literatür":["Makale","Bildiri","Tez","Patent","Kitapçık","Rapor","Sunu","Bilgi Notu","Örnek Çalışma","İnternet","Hepsi"],
+                                "Benzetim":["Elektromanyetik","Hepsi"],
+                                "Kodlama":["Özgün Kod","Hazır Kod","Hepsi"],
+                                "Evrak":["Satın Alma","Fiyat Teklifi","Başvuru","Rapor","Saha Notu","Hepsi"],
+                                "Ürün":["Broşür","Fiyat Sayfası","Tanıtım Sayfası","Veri Föyü","Kılavuz","Uygulama Notu","Hepsi"],
+                                "Medya":["Vidyo","Ses","Fotoğraf","Hepsi"],
+                                "Program":["Benzetim","Web","Hesaplama","Modelleme","Kodlama","Araç & Gereç","Sürücü","İşletim Sistemi","Hepsi"],
+                                "Modelleme":["Baskılı Devre","Mekanik","Hepsi"],
+                                "Ölçüm":["Elektromanyetik","Hepsi"],
+                               }
+
+            /*------------------------------------------------------------
+				Configuration:category Specific Table Columns
+			-------------------------------------------------------------*/
+            var categorySpecificColumnIds = {
+                "El Kitabı":{"Kodlama":"language","Elektronik":"topic","Elektromanyetik":"topic"},
+                "Literatür":{"Makale":"authors","Bildiri":"authors","Tez":"authors","Patent":"authors","Kitapçık":"book","Rapor":"authors","Sunu":"authors","Bilgi Notu":"authors","Örnek Çalışma":"topic","İnternet":"source"},
+                "Benzetim":{"Elektromanyetik":"program"},
+                "Kodlama":{"Özgün Kod":"program","Hazır Kod":"program"},
+                "Evrak":{"Satın Alma":"product","Fiyat Teklifi":"product","Başvuru":"target","Rapor":"authors","Saha Notu":"area"},
+                "Ürün":{"Broşür":"company","Fiyat Sayfası":"company","Tanıtım Sayfası":"company","Veri Föyü":"company","Kılavuz":"product","Uygulama Notu":"product"},
+                "Medya":{"Vidyo":"source","Ses":"source","Fotoğraf":"source"},
+                "Program":{"Benzetim":"version","Web":"version","Hesaplama":"version","Modelleme":"version","Kodlama":"version","Araç & Gereç":"version","Sürücü":"hardware","İşletim Sistemi":"version"},
+                "Modelleme":{"Baskılı Devre":"program","Mekanik":"program"},
+                "Ölçüm":{"Elektromanyetik":"parameter",},
+            }
+            var categorySpecificColumnNames = {
+                "El Kitabı":{"Kodlama":"Lisan","Elektronik":"Konu","Elektromanyetik":"Konu"},
+                "Literatür":{"Makale":"Yazar(lar)","Bildiri":"Yazar(lar)","Tez":"Yazar","Patent":"Yazar(lar)","Kitapçık":"Kitap","Rapor":"Yazar(lar)","Sunu":"Yazar(lar)","Bilgi Notu":"Yazar(lar)","Örnek Çalışma":"Konu","İnternet":"Kaynak"},
+                "Benzetim":{"Elektromanyetik":"Program"},
+                "Kodlama":{"Özgün Kod":"Lisan","Hazır Kod":"Lisan"},
+                "Evrak":{"Satın Alma":"Ürün","Fiyat Teklifi":"Ürün","Başvuru":"Başvuru Yeri","Rapor":"Hazırlayan(lar)","Saha Notu":"Saha"},
+                "Ürün":{"Broşür":"Firma","Fiyat Sayfası":"Firma","Tanıtım Sayfası":"Firma","Veri Föyü":"Firma","Kılavuz":"Ürün","Uygulama Notu":"Ürün"},
+                "Medya":{"Vidyo":"Kaynak","Ses":"Kaynak","Fotoğraf":"Kaynak"},
+                "Program":{"Benzetim":"Sürüm","Web":"Sürüm","Hesaplama":"Sürüm","Modelleme":"Sürüm","Kodlama":"Sürüm","Araç & Gereç":"Sürüm","Sürücü":"Donanım","İşletim Sistemi":"Sürüm"},
+                "Modelleme":{"Baskılı Devre":"Program","Mekanik":"Program"},
+                "Ölçüm":{"Elektromanyetik":"Parametre",},
+            }
+
+            /*------------------------------------------------------------
+				Configuration:category Specific Details Fields
+			-------------------------------------------------------------*/
+            var categorySpecificDetailsFieldNames = {
+                "El Kitabı":{
+                    "Kodlama":["language","library","source"],
+                    "Elektronik":["topic","source"],
+                    "Elektromanyetik":["topic"],
+                },
+                "Literatür":{
+                    "Makale":["authors","institution","publisher","year"],
+                    "Bildiri":["authors","institution","organization","year"],
+                    "Tez":["authors","institution","advisors","year"],
+                    "Patent":["authors","year"],
+                    "Kitapçık":["book","chapter","authors","year"],
+                    "Rapor":["authors","institution","year"],
+                    "Sunu":["authors","institution","year"],
+                    "Bilgi Notu":["authors","institution","source","year"],
+                    "Örnek Çalışma":["topic","year"],
+                    "İnternet":["authors","source"],
+                },
+                "Benzetim":{
+                    "Elektromanyetik":["program","version"],
+                },
+                "Kodlama":{
+                    "Özgün Kod":["program","version"],
+                    "Hazır Kod":["program","version"],
+                },
+                "Evrak":{
+                    "Satın Alma":["product","company","supplier"],
+                    "Fiyat Teklifi":["product","company","supplier"],
+                    "Başvuru":["target"],
+                    "Rapor":["authors"],
+                    "Saha Notu":["area","authors"],
+                },
+                "Ürün":{
+                    "Broşür":["company"],
+                    "Fiyat Sayfası":["company","supplier"],
+                    "Tanıtım Sayfası":["company"],
+                    "Veri Föyü":["company"],
+                    "Kılavuz":["product","company"],
+                    "Uygulama Notu":["product","company"],
+                },
+                "Medya":{
+                    "Vidyo":["source"],
+                    "Ses":["source"],
+                    "Fotoğraf":["source"],
+                },
+                "Program":{
+                    "Benzetim":["version","company","license"],
+                    "Web":["version","company","license"],
+                    "Hesaplama":["version","company","license"],
+                    "Modelleme":["version","company","license"],
+                    "Kodlama":["version","company","license"],
+                    "Araç & Gereç":["version","company","license"],
+                    "Sürücü":["hardware","company","version"],
+                    "İşletim Sistemi":["version","license"],
+                },
+                "Modelleme":{
+                    "Baskılı Devre":["version","program"],
+                    "Mekanik":["version","program"],
+                },
+                "Ölçüm":{
+                    "Elektromanyetik":["parameter","instrument"],
+                },
+            }
+            var categorySpecificDetailsFieldLabeLabels = {
+                "El Kitabı":{
+                    "Kodlama":["Lisan","Kütüphane","Kaynak"],
+                    "Elektronik":["Konu","Kaynak"],
+                    "Elektromanyetik":["Konu"],
+                },
+                "Literatür":{
+                    "Makale":["Yazar(lar)","Kurum","Naşir","Yıl"],
+                    "Bildiri":["Yazar(lar)","Kurum","Organizasyon","Yıl"],
+                    "Tez":["Yazar","Kurum","Danışman(lar)","Yıl"],
+                    "Patent":["Yazar","Yıl"],
+                    "Kitapçık":["Kitap","Bölüm","Yazar(lar)","Yıl"],
+                    "Rapor":["Yazar(lar)","Kurum","Yıl"],
+                    "Sunu":["Yazar(lar)","Kurum","Yıl"],
+                    "Bilgi Notu":["Yazar(lar)","Kurum","Kaynak","Yıl"],
+                    "Örnek Çalışma":["Konu","Yıl"],
+                    "İnternet":["Yazar(lar)","Kaynak"],
+                },
+                "Benzetim":{
+                    "Elektromanyetik":["Program","Sürüm"],
+                },
+                "Kodlama":{
+                    "Özgün Kod":["Lisan","Sürüm"],
+                    "Hazır Kod":["Lisan","Sürüm"],
+                },
+                "Evrak":{
+                    "Satın Alma":["Ürün","Firma","Tedarikçi"],
+                    "Fiyat Teklifi":["Ürün","Firma","Tedarikçi"],
+                    "Başvuru":["Başv. Yeri"],
+                    "Rapor":["Hazırlayan(lar)"],
+                    "Saha Notu":["Saha","Hazırlayan(lar)"],
+                },
+                "Ürün":{
+                    "Broşür":["Firma"],
+                    "Fiyat Sayfası":["Firma","Tedarikçi"],
+                    "Tanıtım Sayfası":["Firma"],
+                    "Veri Föyü":["Firma"],
+                    "Kılavuz":["Ürün","Firma"],
+                    "Uygulama Notu":["Ürün","Firma"],
+                },
+                "Medya":{
+                    "Vidyo":["Kaynak"],
+                    "Ses":["Kaynak"],
+                    "Fotoğraf":["Kaynak"],
+                },
+                "Program":{
+                    "Benzetim":["Sürüm","Firma","Lisans"],
+                    "Web":["Sürüm","Firma","Lisans"],
+                    "Hesaplama":["Sürüm","Firma","Lisans"],
+                    "Modelleme":["Sürüm","Firma","Lisans"],
+                    "Kodlama":["Sürüm","Firma","Lisans"],
+                    "Araç & Gereç":["Sürüm","Firma","Lisans"],
+                    "Sürücü":["Donanım","Firma","Sürüm"],
+                    "İşletim Sistemi":["Sürüm","Lisans"],
+                },
+                "Modelleme":{
+                    "Baskılı Devre":["Sürüm","Program"],
+                    "Mekanik":["Sürüm","Program"],
+                },
+                "Ölçüm":{
+                    "Elektromanyetik":["Parametre","Cihaz"],
+                },
+            }
+            /*--------------------------------------------------------------
+                Configuration: MomentJS Locale
+            --------------------------------------------------------------*/
+            moment.locale("tr")
+
+
+            /*=====================================================
+				Helpers
+			=====================================================*/
+            function trueReleativePath(item){
+                if(/[/]/.test(item["path"])){
+                    // in case full path under KAMUS/docs is supplied
+                    return "KAMUS/docs/"+item["path"];
+                }
+                else{
+                    // in case path under KAMUS/docs/'category'/'subcategory'/ is supplied
+                    // this will be revised later as above
+                    return "KAMUS/docs/"+item.category+"/"+item.subCategory+"/"+item["path"];
+                }
+            }
+
+            Number.prototype.toByteStr=function(){
+                var decimal = 1
+                if(this<1024){
+                    return (this)+" B";
+                }
+                else if(this<1024*1024 && this>=1024){
+                    return (this/1024).toFixed(decimal)+" kB";
+                }
+                else if(this<1024*1024*1024 && this>=1024*1024){
+                    return (this/(1024*1024)).toFixed(decimal)+" MB";
+                }
+                else{
+                    return (this/(1024*1024*1024)).toFixed(decimal)+" GB";
+                }
+            }	
+
+            String.prototype.toTitleCase = function() {
+                var words = this.split(' ')
+                var array = []
+                for (var i=0; i<words.length; ++i) {
+                    array.push(words[i].charAt(0).toUpperCase() + words[i].slice(1))
+                }
+                return array.join(' ')				
+            }
+
+            String.prototype.validateAsPath = function(){
+                temp = this
+                if(/[/><\n\t:\u0022|?*\\]/.test(temp)){
+                    if(/[çğıöşüÇĞİÖŞÜ]/.test(temp)){
+                        temp = temp.replace(/[/]/, " veya ")
+                        temp = temp.replace(/[>]/, " büyüktür ")
+                        temp = temp.replace(/[<]/, " küçüktür ")
+                    }
+                    else{
+                        temp = temp.replace(/[/]/, " or ")
+                        temp = temp.replace(/[>]/, " bigger than ")
+                        temp = temp.replace(/[<]/, " less than ")
+                    }
+                    temp = temp.replace(/[\n]/," ")
+                    temp = temp.replace(/[\t]/," ")
+                    temp = temp.replace(/[\:]/,",")
+                    temp = temp.replace(/[\"]/,"\'")
+                    temp = temp.replace(/[|]/,",")
+                    temp = temp.replace(/[?]/,"")
+                    temp = temp.replace(/[*]/,"x")
+                    temp = temp.replace(/[\\]/," ")
+                    temp = temp.replace(/[\/]/," ")
+                    temp = temp.replace(/[  ]/," ")
+                }
+                return temp
+            }
+
+            function bytes2str(bytes) {
+                var s = ['B', 'kB', 'MB', 'GB', 'TB', 'PB'];
+                var e = Math.floor(Math.log(bytes) / Math.log(1024));
+                return (bytes / Math.pow(1024, e)).toFixed(0) + s[e];
+            }
+
+            function findPaths(files){
+                var allPaths = []
+                for (i = 0;i<files.length;i++){
+                    var paths = files[i].relativePath.split("/")
+                    var path = ""
+                    for(j=0;j<paths.length;j++){
+                        if(path!="") path += "/"
+                        path += paths[j]
+                        if(allPaths.indexOf(path)==-1) allPaths.push(path)
+                            }
+                }
+                return allPaths
+            }
+
+            function dirtree(path,paths){
+                var item = {}
+                item["path"] = path
+                item["value"] = path.split("/")[path.split("/").length-1]
+                if(paths.filter(function(obj){return obj.indexOf(path + "/")!=-1}).length!=0) item["type"] = "Klasör"
+                else item["type"] = "Dosya"   
+                if(item["type"]=="Klasör"){
+                    var subs = []
+                    for(var i=0;i<paths.length;++i){
+                        if(paths[i].replace(path+"/","").split("/").length==1 && paths[i]!=path && paths[i].indexOf(path)!=-1){
+                            subs.push(paths[i])
+                        }
+                    }
+                    if(subs.length!=0) item["data"] = []
+                    for(var i=0;i<subs.length;++i){
+                        item["data"].push(dirtree(subs[i],paths))
+                    }
+                }
+                return item
+            }
+
+            /*-------------------------------------------------------------
+                Helpers: Is File Browser Compatible
+            -------------------------------------------------------------*/
+            function previewFile(item){
+                if(item.type=="Bağlantı") $$("previewFrame").load(item.url);
+                else{
+                    if(!$$("previewAccordionItem").config.collapsed){
+                        if(item.path.split(".").pop().toLowerCase()=="pdf" ||
+                           item.path.split(".").pop().toLowerCase()=="jpg" ||
+                           item.path.split(".").pop().toLowerCase()=="jpeg" ||
+                           item.path.split(".").pop().toLowerCase()=="bmp" ||
+                           item.path.split(".").pop().toLowerCase()=="txt" ||
+                           item.path.split(".").pop().toLowerCase()=="html" ||
+                           item.path.split(".").pop().toLowerCase()=="mp3" ||
+                           item.path.split(".").pop().toLowerCase()=="mp4" ||
+                           item.path.split(".").pop().toLowerCase()=="py" ||
+                           item.path.split(".").pop().toLowerCase()=="png" ||
+                           item.path.indexOf("http")!=-1){
+                            $$("previewFrame").load(item.url);
+                        }
+                        else if(item.path.split(".").pop().toLowerCase()=="ipynb"){
+                            $$("previewFrame").load("http://nbviewer.jupyter.org/urls/"+item.url.replace("https://www","dl"));; 
+                        }
+                    }
+                }
+            }
+
+
+            var docs = []
+            webix.ready(function(){
+                //webix.ui.fullScreen()
+                /*========================================================
+					Elements 
+				========================================================*/
+
+                /*---------------------------------------------------------
+				 	Elements:Table Head
+				---------------------------------------------------------*/
+                var tableHeadToolbar = {
+                    id:"tableHeadToolbar",
+                    view:"toolbar",
+                    cols:[
+                        {view:"label", template:"<span style='font-size:20px; font-weight:bold;'>Belgeler</span>", align:"center"},
+                        {view:"button", id:"addEntryButton", type:"icon", icon:"plus", label:"Ekle", align:"right", width:70},
+                    ],
+                    scroll:true,
+                }
+
+                /*---------------------------------------------------------
+				 	Project Select
+				---------------------------------------------------------*/
+                var projectSelectOptions = []
+                for(var i=0; i<projects.length; i++){projectSelectOptions.push({id:projects[i]});}
+                var projectSelectRadio = {
+                    id:"projectSelectRadio",
+                    view:"radio",
+                    options:projectSelectOptions,
+                    css:{"font-weight":"bold"},
+                    on:{
+                        "onChange":function(){
+                            $$("subProjectSelectRadio").setValue("")
+
+                            var project = this.getValue()
+                            if(project!="Hepsi"){
+                                $$("subProjectSelectRadio").define("options",subProjects[project])
+                                $$("subProjectSelectRadio").refresh()						
+                                $$("subProjectSelectToolbar").show()
+                            }
+                            else $$("subProjectSelectToolbar").hide()
+
+                            // Table
+                            $$("table").filterByAll()
+                            $$("table").sort("no","desc","int")
+                        }
+                    }
+                }
+                var projectSelectToolbar = {
+                    id:"projectSelectToolbar",
+                    view:"toolbar",
+                    cols:[projectSelectRadio]
+                }
+
+                /*---------------------------------------------------------
+				 	Sub Project Select
+				---------------------------------------------------------*/
+                var subProjectSelectOptions = [""]
+                var subProjectSelectRadio = {
+                    id:"subProjectSelectRadio",
+                    view:"radio",
+                    options:subProjectSelectOptions,
+                    css:{"font-style":"italic"},
+                    on:{
+                        "onChange":function(){
+                            $$("table").filterByAll()
+                            $$("table").sort("no","desc","int")
+                        }
+                    }
+                }
+                var subProjectSelectToolbar = {
+                    id:"subProjectSelectToolbar",
+                    view:"toolbar",
+                    cols:[subProjectSelectRadio],
+                    hidden:true
+                }
+                /*---------------------------------------------------------
+				 	category Select
+				---------------------------------------------------------*/
+                var categorySelectOptions = []
+                for(var i=0; i<categorys.length; i++){categorySelectOptions.push({id:categorys[i]});}
+                var categorySelectRadio = {
+                    id:"categorySelectRadio",
+                    view:"radio",
+                    options:categorySelectOptions,
+                    css:{"font-weight":"bold"},
+                    on:{
+                        "onChange":function(){
+                            $$("subCategorySelectRadio").setValue("")
+
+                            var category = this.getValue()
+                            if(category!="Hepsi"){
+                                $$("subCategorySelectRadio").define("options",subCategorys[category])
+                                $$("subCategorySelectRadio").refresh()						
+                                $$("subCategorySelectToolbar").show()
+                            }
+                            else $$("subCategorySelectToolbar").hide()
+
+                            // Table
+                            var columns = []
+                            columns.push(commonColumns[0])
+                            columns.push(commonColumns[1])
+                            $$("table").define("columns",columns)
+                            $$("table").refreshColumns()
+                            $$("table").refreshHeaderContent()
+                            $$("table").filterByAll()
+                            $$("table").sort("no","desc","int")
+
+                            // Details form
+                            categorySpecificFieldRows = []
+                            categorySpecificFieldRows.push(
+                                {cols:[
+                                    {view:"text", label:"Başlık", name:"title", labelWidth:70},
+                                ]}					
+                            )
+                        }
+                    }
+                }
+                var categorySelectToolbar = {
+                    id:"categorySelectToolbar",
+                    view:"toolbar",
+                    cols:[categorySelectRadio],
+                    autoheight:true
+                }
+
+                /*---------------------------------------------------------
+				 	Sub category Select
+				---------------------------------------------------------*/
+                var subCategorySelectOptions = [""]
+                var subCategorySelectRadio = {
+                    id:"subCategorySelectRadio",
+                    view:"radio",
+                    options:subCategorySelectOptions,
+                    css:{"font-style":"italic"},
+                    on:{
+                        "onChange":function(){
+                            var category = $$("categorySelectRadio").getValue()
+                            var subCategory = this.getValue()
+
+                            if(subCategory!="" && subCategory!="Hepsi"){
+                                // Table
+                                var categorySpecificColumn = {}
+                                categorySpecificColumn["id"] = categorySpecificColumnIds[category][subCategory]
+                                categorySpecificColumn["header"] = [categorySpecificColumnNames[category][subCategory], {content:"textFilter"}]
+                                categorySpecificColumn["width"] = 240
+                                var columns = []
+                                columns.push(commonColumns[0])
+                                columns.push(categorySpecificColumn)
+                                columns.push(commonColumns[1])
+                                $$("table").define("columns",columns)
+                                $$("table").refreshColumns()
+                                $$("table").refreshHeaderContent()
+                            }
+                            if(subCategory=="Hepsi"){
+                                // Table
+                                var columns = []
+                                columns.push(commonColumns[0])
+                                columns.push(commonColumns[1])
+                                $$("table").define("columns",columns)
+                                $$("table").refreshColumns()
+                                $$("table").refreshHeaderContent()
+                                // Details form
+                                categorySpecificFieldRows = []
+                                categorySpecificFieldRows.push(
+                                    {cols:[
+                                        {view:"text", label:"Başlık", name:"title", labelWidth:70},
+                                    ]}					
+                                )
+                            }
+                            $$("table").filterByAll()
+                            $$("table").sort("no","desc","int")
+                        }
+                    }
+                }
+                var subCategorySelectToolbar = {
+                    id:"subCategorySelectToolbar",
+                    view:"toolbar",
+                    cols:[subCategorySelectRadio],
+                    hidden:true
+                }
+
+                /*---------------------------------------------------------
+				 	Elements:Table
+				---------------------------------------------------------*/
+                var commonColumns = [
+                    {id:"no", header:"Sıra", width:70, sort:"int"},
+                    {id:"title", header:["Başlık", {content:"textFilter"}], fillspace:10}
+                ]
+                var table = {
+                    id: "table",
+                    view:"datatable",
+                    url:"/belgeler",
+                    save:"rest->/belgeler",
+                    select:"row",
+                    navigation:true, 
+                    columns:commonColumns,
+                    on:{
+                        "onAfterSelect":function(){
+                            var item = this.getSelectedItem()
+                            // Preview
+                            if(!$$("previewAccordionItem").config.collapsed){
+                                if(item["type"]=="Dosya"){
+                                    $$("directoryTree").clearAll()
+                                    $$("directoryTree").hide()
+                                    previewFile(item)
+                                }
+                                else{
+                                    $$("previewFrame").load("");
+                                    webix.ajax().get("/docs_dirtree", {"no":item["no"]}, function(text,xml,xhr){
+                                        console.log(text)
+                                        $$("directoryTree").clearAll()
+                                        $$("directoryTree").define("data",JSON.parse(text))
+                                        $$("directoryTree").show()
+                                    })
+                                }
+                            }
+                            // Details sheet
+                            var project = item.project
+                            var category = item.category
+                            var subCategory = item.subCategory
+                            if(project && project!="Hepsi"){
+                                $$("detailsProperty1").config.elements[2].options = subProjects[project].slice(0,subProjects[project].length-1).concat([""])
+                            }
+                            $$("detailsProperty1").config.elements[4].options = subCategorys[category].slice(0,subCategorys[category].length-1)
+                            var categorySpecificProperties = [
+                                {label:"<span style='font-weight:bold;'>Özel</span>", type:"label"},
+                                {label:"<span style='color:green;font-weight:bold;'>Başlık</span>",type:"text",id:"title"},
+                            ]
+                            if(subCategory){
+                                names = categorySpecificDetailsFieldNames[category][subCategory]
+                                labels = categorySpecificDetailsFieldLabeLabels[category][subCategory]
+                                for(var i=0; i<names.length; i++){
+                                    categorySpecificProperties.push({
+                                        label:"<span style='font-weight:bold;color:green;'>"+labels[i]+"</span>", 
+                                        type:"text",id:names[i]
+                                    })
+                                }
+                            }
+                            $$("detailsProperty2").define("elements",categorySpecificProperties)
+                            $$("detailsProperty2").refresh()
+                            $$("detailsProperty2").resize()
+                            $$("detailsExplanation").setValue(item.explanation)
+
+                            //this.getNode().focus()
+                        },
+                        "onAfterLoad":function(){
+                            $$("table").sort("no","desc","int")
+                        },
+                        "onItemDblClick":function(){
+                            window.open(this.getSelectedItem()["url"]);
+                        },
+                        "onAfterRender":function(){
+                            this.filterByAll = function(){
+                                var title = this.getFilter("title").value
+                                var column2id = "" 
+                                var column2filter = ""
+
+                                var project = $$("projectSelectRadio").getValue()
+                                if(!project || project=="Hepsi") project=""
+                                var subProject = $$("subProjectSelectRadio").getValue()
+                                if(!subProject || subProject=="Hepsi") subProject=""
+
+                                var category = $$("categorySelectRadio").getValue()
+                                if(!category ||category=="Hepsi") category=""
+                                var subCategory = $$("subCategorySelectRadio").getValue()
+                                if(subCategory && subCategory!="Hepsi"){
+                                    column2id = categorySpecificColumnIds[category][subCategory] 
+                                    var column2filter = this.getFilter(column2id).value
+                                    }
+                                else subCategory = ""
+
+                                if(	!title && !column2filter &&
+                                   !project && !subProject &&
+                                   !category && !subCategory){ return this.filter();}
+
+                                this.filter(function(obj){
+                                    if(column2id!=""){
+                                        if(
+                                            obj.project.indexOf(project)!=-1 &&
+                                            obj.subProject.indexOf(subProject)!=-1 &&
+                                            obj.category.indexOf(category)!=-1 &&
+                                            obj.subCategory.indexOf(subCategory)!=-1 &&
+                                            obj.title.toLowerCase().indexOf(title)!=-1 &&
+                                            obj[column2id].toLowerCase().indexOf(column2filter)!=-1) 
+                                            return true;
+                                    }
+                                    else{
+                                        if(
+                                            obj.project.indexOf(project)!=-1 &&
+                                            obj.subProject.indexOf(subProject)!=-1 &&
+                                            obj.category.indexOf(category)!=-1 &&
+                                            obj.subCategory.indexOf(subCategory)!=-1 &&
+                                            obj.title.toLowerCase().indexOf(title)!=-1)
+                                            return true;
+                                    }
+                                    return false;
+                                })
+                            }
+                        },
+                    }
+                }
+
+                var previewFrame = {
+                    id: "previewFrame",
+                    view:"iframe",
+                    gravity:1,
+                }			
+                var directoryTree = {
+                    id:"directoryTree",
+                    view:"tree",
+                    select:true,
+                    navigation:true,
+                    hidden:true,
+                    gravity:1,
+                    on:{
+                        "onAfterSelect":function(id){
+                            var item = this.getItem(id)
+                            console.log(item)
+                            previewFile(item)
+                        },
+                        "onItemDblClick":function(id){
+                            var item = this.getItem(id)
+                            window.open(item["url"]);
+                        }
+                    }
+                }
+                var previewLayout = {
+                    id:"previewLayout",
+                    view:"layout",
+                    rows:[directoryTree,{view:"resizer"},previewFrame],
+                }                
+
+                //---------------------------------------------------------
+                // Elements: Details Sheet
+                //---------------------------------------------------------   
+                var detailsProperty1 = {
+                    id: "detailsProperty1",
+                    view: "property",
+                    autoheight:true,
+                    elements: [
+                        {label:"<span style='font-weight:bold;'>Genel</span>", type:"label"},
+                        {label:"<span style='color:green;font-weight:bold;'>Proje</span>",type:"select",id:"project",options:projects.slice(0,projects.length-1).concat([""])},
+                        {label:"<span style='color:green;font-weight:bold;'>İş Paketi</span>",type:"select",id:"subProject",options:[]},
+                        {label:"<span style='color:green;font-weight:bold;'>Sınıf</span>",type:"select",id:"category",options:categorys.slice(0,categorys.length-1)},
+                        {label:"<span style='color:green;font-weight:bold;'>Alt Sınıf</span>",type:"select",id:"subCategory",options:[]},
+                        {label:"<span style='color:green; font-weight:bold;'>Sıra</span>", id:"no"},
+                        {label:"<span style='color:green; font-weight:bold;'>Tür</span>", id:"type"},
+                        {label:"<span style='color:green; font-weight:bold;'>Boyut</span>", id:"sizeStr"},
+                        {label:"<span style='color:green; font-weight:bold;'>Çıktı</span>", id:"print", type:"text"},
+                        {label:"<span style='color:green; font-weight:bold;'>Ekleme</span>", id:"addDate"},
+                        {label:"<span style='color:green; font-weight:bold;'>Son Ziyaret</span>", id:"visitDate"},
+                    ],
+                    on: {
+                        "onAfterEditStop": function(state, editor) {
+                            var item = $$("table").getSelectedItem()
+                            item[editor.id] = state.value
+                            if(editor.id=="project"){
+                                var project = state.value
+                                if(project && project!="Hepsi"){
+                                    this.config.elements[2].options = subProjects[project].slice(0,subProjects[project].length-1).concat([""])
+                                    item["subProject"] = ""
+                                }
+                            }
+                            if (editor.id == "category") {
+                                var category = state.value
+                                this.config.elements[4].options = subCategorys[category].slice(0,subCategorys[category].length-1)
+                                item["subCategory"] = subCategorys[category][0]
+                            }
+                            if(editor.id=="subCategory"){
+                                var category = this.config.elements[3].value
+                                var subCategory = state.value
+                                if(subCategory){
+                                    var categorySpecificProperties = []
+                                    categorySpecificProperties.push(
+                                        {label:"<span style='font-weight:bold;'>Özel</span>", type:"label"},
+                                        {label:"<span style='color:green;font-weight:bold;'>Başlık</span>",type:"text",id:"title"}
+                                    )
+                                    names = categorySpecificDetailsFieldNames[category][subCategory]
+                                    labels = categorySpecificDetailsFieldLabeLabels[category][subCategory]
+                                    for(var i=0; i<names.length; i++){
+                                        categorySpecificProperties.push({
+                                            label:"<span style='font-weight:bold;color:green;'>"+labels[i]+"</span>", 
+                                            type:"text",id:names[i]
+                                        })
+                                    }
+                                    $$("detailsProperty2").define("elements",categorySpecificProperties)
+                                    $$("detailsProperty2").refresh()
+                                }
+                            }
+                            $$("table").updateItem(item.id,item)
+                            this.refresh()
+                        },
+                        "onBeforeEditStart":function(id){
+                            if(id=="project"){
+                                this.config.elements[2].value = ""
+                            }
+                            if(id=="category"){
+                                this.config.elements[4].value = ""
+                            }
+                            if(id=="subCategory"){
+                                var categorySpecificProperties = []
+                                categorySpecificProperties.push(
+                                    {label:"<span style='font-weight:bold;'>Özel</span>", type:"label"},
+                                    {label:"<span style='color:green;font-weight:bold;'>Başlık</span>",type:"text",id:"title", value:$$("table").getSelectedItem().title}
+                                )
+                                $$("detailsProperty2").define("elements",categorySpecificProperties)
+                                $$("detailsProperty2").refresh()
+                            }
+                            this.refresh()
+                        }
+                    }						
+                }
+
+                var detailsProperty2 = {
+                    id:"detailsProperty2",
+                    view:"property",  
+                    elements:[
+                        {label:"<span style='font-weight:bold;'>Özel</span>", type:"label"},
+                    ],
+                    autoheight:true,
+                    on:{
+                        "onAfterEditStop":function(state,editor,ignoreUpdate){
+                            var item = $$("table").getSelectedItem()
+                            item[editor.id] = state.value
+                            $$("table").updateItem(item.id,item)
+                        },
+                    }							
+                }                
+
+                var relations = {
+                    rows:[
+                        {view:'label', /*width:70,*/ template:"<span style='color:green;font-weight:bold;'>İlişkiler</span>"},
+                        {view:'list', name:"relations", /*width:200,*/ gravity:1}
+                    ],
+                    gravity:1,
+                    autoheight:true,
+                }
+                var explanation = {
+                    rows:[
+                        {view:'textarea', id:"detailsExplanation", label:"<span style='color:green;font-weight:bold;'>Açıklama</span>",
+                         labelPosition:"top", gravity:1, name:"explanation", 
+                         on:{
+                             "onChange":function(newv,oldv){
+                                 if(newv!=$$("table").getSelectedItem().explanation){
+                                     var item = $$("table").getSelectedItem()
+                                     item[this.config.name] = newv
+                                     $$("table").updateItem(item.id,item)
+                                 }
+                             },
+                         }},
+                    ],
+                    gravity:1,
+                }
+                var detailsProperty3 = {
+                    view:"layout", 
+                    id:"detailsProperty3",
+                    rows:[
+                        {view:"property",elements:[{ label:"<span style='font-weight:bold;'>Yorum</span>", type:"label"}],autoheight:true},
+                        explanation, relations,
+                    ],
+                }
+
+                //---------------------------------------------------------
+                // Elements: Add Details Sheet
+                //---------------------------------------------------------    
+                var addDetailsProperty1 = {
+                    id:"addDetailsProperty1",
+                    view:"property",  
+                    elements:[
+                        {label:"<span style='font-weight:bold;'>Genel</span>", type:"label"},
+                        {label:"<span style='color:green;font-weight:bold;'>Proje</span>",type:"select",id:"project",options:projects.slice(0,projects.length-1).concat([""])},
+                        {label:"<span style='color:green;font-weight:bold;'>İş Paketi</span>",type:"select",id:"subProject",options:[]},
+                        {label:"<span style='color:green;font-weight:bold;'>Sınıf</span>",type:"select",id:"category",options:categorys.slice(0,categorys.length-1), value:"Literatür"},
+                        {label:"<span style='color:green;font-weight:bold;'>Alt Sınıf</span>",type:"select",id:"subCategory", options:subCategorys["Literatür"].slice(0,subCategorys["Literatür"].length-1), value:"Makale"},
+                    ],
+                    autoheight:true,
+                    on: {
+                        "onAfterEditStop": function(state, editor) {
+                            if(editor.id=="project"){
+                                var project = state.value
+                                if(project && project!="Hepsi"){
+                                    this.config.elements[2].options = subProjects[project].slice(0,subProjects[project].length-1).concat([""])
+                                    this.config.elements[2].value = ""
+                                }
+                            }
+                            if (editor.id == "category") {
+                                var category = state.value
+                                this.config.elements[4].options = subCategorys[category].slice(0,subCategorys[category].length-1)
+                                this.config.elements[4].value = subCategorys[category][0]
+                            }
+                            if(editor.id=="subCategory"){
+                                var category = this.config.elements[3].value
+                                var subCategory = state.value
+                                if(subCategory){
+                                    var categorySpecificProperties = $$("addDetailsProperty2").config.elements.slice(0,2)
+                                    names = categorySpecificDetailsFieldNames[category][subCategory]
+                                    labels = categorySpecificDetailsFieldLabeLabels[category][subCategory]
+                                    for(var i=0; i<names.length; i++){
+                                        categorySpecificProperties.push({
+                                            label:"<span style='font-weight:bold;color:green;'>"+labels[i]+"</span>", 
+                                            type:"text",id:names[i]
+                                        })
+                                    }
+                                    $$("addDetailsProperty2").define("elements",categorySpecificProperties)
+                                    $$("addDetailsProperty2").refresh()
+                                }
+                            }
+                            this.refresh()
+                        },
+                        "onAfterEditStart":function(id){
+                            if(id=="project"){
+                                this.config.elements[2].value = "" 
+                            }
+                            if(id=="category"){
+                                this.config.elements[4].value = "" 
+                            }
+                            if(id=="subCategory"){
+                                var categorySpecificProperties = $$("addDetailsProperty2").config.elements.slice(0,2)
+                                $$("addDetailsProperty2").define("elements",categorySpecificProperties)
+                                $$("addDetailsProperty2").render()
+                            }
+                            this.refresh()
+                        },
+                    }	
+                }
+
+                var addDetailsProperty2 = {
+                    id:"addDetailsProperty2",
+                    view:"property",  
+                    elements:[
+                        {label:"<span style='font-weight:bold;'>Özel</span>", type:"label"},
+                        {label:"<span style='color:green;font-weight:bold;'>Başlık</span>",type:"text",id:"title", value:"Başlık"},
+                        {label:"<span style='color:green;font-weight:bold;'>Yazar(lar)</span>",type:"text",id:"authors"},
+                        {label:"<span style='color:green;font-weight:bold;'>Kurum</span>",type:"text",id:"institution"},
+                        {label:"<span style='color:green;font-weight:bold;'>Naşir</span>",type:"text",id:"publisher"},
+                        {label:"<span style='color:green;font-weight:bold;'>Yıl</span>",type:"text",id:"year"}
+                    ],
+                    autoheight:true,
+                    on:{
+                        "onAfterRender":function(id){this.resize()}
+                    }
+                }
+
+                var addDetailsRelationsTable = {
+                    id:"addDetailsRelationsTable",
+                    view:"datatable",
+                    columns:[
+                        {id:"no", width:55},
+                        {id:"type",fillspace:1},
+                    ],
+                    select:true,
+                    navigation:true,
+                    header:false,
+                }
+                var addDetailsProperty3 = {
+                    id:"addDetailsProperty3",
+                    view:"layout",
+                    gravity:1,
+                    rows:[
+                        {view:"property",elements:[{label:"<span style='font-weight:bold;'>Yorum</span>",type:"label"}],autoheight:true},
+                        {view:'textarea', id:"addDetailsExplanation", label:"<span style='color:green;font-weight:bold;'>Açıklama</span>", labelPosition:"top", autoheight:true, name:"explanation"},
+                        {view:'layout',rows:[
+                            {view:'label', template:"<span style='color:green;font-weight:bold;'>İlişkiler</span>"},
+                            addDetailsRelationsTable,
+                            {cols:[
+                                {id:"addEntryRelationAddButton", view:"button", type:"icon", icon:"plus", tooltip:"Ekle"},
+                                {id:"addEntryRelationRemoveButton", view:"button", type:"icon", icon:"minus", tooltip:"Sil"}
+                            ]}
+                        ]}
+
+                    ],
+                }
+
+                var htmlform1 = {
+                    id: "htmlform1",
+                    view:"htmlform",
+                    content: document.getElementById("frame"),
+                }
+
+                var datatable1 = {
+                    id: "datatable1",
+                    view: "datatable",
+                    columns: [
+                        {id:"type", width: 55, template:function(obj){
+                            if(obj.type=="Dosya")  return "<div align='center'><span class='webix_icon fa-file-o'></span></div>";
+                            else if(obj.type=="Klasör")  return "<div align='center'><span class='webix_icon fa-folder'></span></div>";
+                            else if(obj.type=="Bağlantı")  return "<div align='center'><span class='webix_icon fa-link'></span></div>";
+                        }}, 
+                        {id:"path", fillspace: 1, editor: "popup",$popup: "text"}, 
+                        {id:"sizeStr", width: 50}, 
+                    ],
+                    select: true, navigation: true, header: false, editable:true,
+                    on:{
+                        "onBeforeEditStart":function(){ webix.editors.$popup.text.width = this.config.columns[1].width },
+                        "onAfterEditStart":function(id){ if(this.getItem(id)) if(this.getItem(id).type!="Bağlantı") $$("popup").hide() },
+                        "onAfterAdd":function(id){ this.select(id); if(this.getItem(id).type=="Bağlantı") this.editCell(id,"path");},
+                        "onAfterRender":function(){ 
+                            document.getElementById("frame").style.width = this.getNode().style.width
+                            uploader.assignDrop(this.getNode())
+                        }
+                    }
+                }
+                webix.editors.$popup = {text: {id:"popup", view:"popup", body:{view:"text", on:{
+                    "onChange":function(newv){
+                        $$("datatable1").getSelectedItem().path = newv 
+                    }
+                }}}}
+
+                upload_url = ""
+                var addDetailsProperty4 = {
+                    id:"addDetailsProperty4",
+                    view:"layout",
+                    rows:[
+                        {view:"property",elements:[{label:"<span style='font-weight:bold;'>Dosyalar</span>",type:"label"}], autoheight:true}, 
+                        datatable1,
+                        htmlform1,
+                        {cols:[
+                            {id:"addEntryFileAddButton", view:"button", type:"icon", icon:"file-text-o", tooltip:"Dosya Ekle", on:{
+                                "onAfterRender":function(){uploader.assignBrowse(this.getNode(),false)}
+                            }},
+                            {id:"addEntryFolderAddButton", view:"button", type:"icon", icon:"folder-o", tooltip:"Klasör Ekle", on:{
+                                "onAfterRender":function(){uploader.assignBrowse(this.getNode(),true)}
+                            }},
+                            {view:"button", type:"icon", icon:"link", tooltip:"Bağlantı Ekle", click:function(){
+                                $$("datatable1").add({"type":"Bağlantı","size":0})
+                            }},
+                            {view:"button", type:"icon", icon:"minus", tooltip:"Sil", click:function(){$$("datatable1").remove($$("datatable1").getSelectedId())}},
+                            {id:"addEntryClearFilesButton", view:"button", type:"icon", icon:"trash", tooltip:"Temizle", on:{
+                                "onItemClick":function(){
+                                    upload_url = ""
+                                    $$("datatable1").clearAll()
+                                    uploader.cancel()
+                                }
+                            }},
+                            {},
+                        ]}
+                    ],
+                    gravity:1
+                }
+                uploader.on('filesSubmitted', function(files){
+                    var id = $$("datatable1").getFirstId()
+                    var uploadedFiles = []
+                    $$("datatable1").data.each(function(obj){uploadedFiles.push(obj);})
+                    for(i=0; i<files.length; i++){
+                        var file = files[i]
+                        var item = {
+                            "size":file.size, "sizeStr":file.size.toByteStr(),
+                            "type":(file.relativePath.indexOf("/")!=-1)?"Klasör":"Dosya",
+                            "path":file.relativePath.split("/")[0],
+                        }
+                        if(item.type=="Klasör"){
+                            var matched = uploadedFiles.filter(function(obj){return item.path==obj.path})
+                            if(matched.length==0){
+                                uploadedFiles.push(item)
+                                // add and select item
+                                $$("datatable1").add(item);
+                                $$("datatable1").select($$("datatable1").getLastId())
+                            }
+                            else{
+                                for(var j=0; j<uploadedFiles.length; ++j){
+                                    if(matched[0].path==uploadedFiles[j].path){ 
+                                        uploadedFiles[j].size += item.size
+                                        uploadedFiles[j].sizeStr = uploadedFiles[j].size.toByteStr()
+                                        $$("datatable1").remove(uploadedFiles[j].id);
+                                        $$("datatable1").add(uploadedFiles[j]);
+                                        $$("datatable1").select($$("datatable1").getLastId())
+                                        break
+                                    }
+                                }
+                            }
+                        }
+                        else{
+                            uploadedFiles.push(item)
+                            // add and select item
+                            $$("datatable1").add(item);
+                            $$("datatable1").select($$("datatable1").getLastId())
+                        }
+                    }
+                    if(upload_url==""){
+                        webix.ajax().get("/dropbox_upload_folder", function(text,xml,xhr){
+                            upload_url = JSON.parse(text).url
+                            window.open(upload_url)
+                        })
+                    }
+                });
+
+                var tabbar = {
+                    view: "tabbar",
+                    type: "bottom",
+                    multiview: true,
+                    height:23,
+                    options: [
+                        {value: "<span class='webix_icon fa-comment'></span><span class='webix_icon fa-retweet'></span>",id: "addDetailsProperty3"},
+                        {value: "<span class='webix_icon fa-file-o'></span><span class='webix_icon fa-dropbox'></span><span class='webix_icon fa-link'></span>",id: "addDetailsProperty4"},
+                    ],
+                };
+                var data = {
+                    cells: [addDetailsProperty3,addDetailsProperty4]
+                };		
+
+                var addDetailsProperty5 = {
+                    id:"addDetailsProperty5",
+                    view:"layout",
+                    rows:[data,tabbar]
+                }
+                var addDetailsLayout = {
+                    id:"addDetailsLayout",
+                    view:"layout",
+                    rows:[
+                        addDetailsProperty1,
+                        addDetailsProperty2,
+                        addDetailsProperty5,
+                        {view:"button", label:"Kaydı Ekle", click:function(){
+                            item = {}
+                            properties = $$("addDetailsProperty1").getValues() 
+                            for(var key in properties){item[key] = properties[key]; }
+                            properties = $$("addDetailsProperty2").getValues() 
+                            for(var key in properties){item[key] = properties[key]; }
+                            item["explanation"] = $$("addDetailsExplanation").getValue()
+                            item["relations"] = []
+                            item["addDate"] = moment().format("DD-MMMM-YYYY")
+                            item["upload_url"] = upload_url
+                            item["files"] = []
+                            $$("datatable1").data.each(function(obj){item.files.push(obj);})
+                            // item.size
+                            item["size"] = 0
+                            $$("datatable1").data.each(function(obj){item.size += obj.size})
+                            item["sizeStr"] = item.size.toByteStr()
+                            // item.type
+                            if(item.files.length==1 && item.files[0].type!="Klasör"){ item["type"] = "Dosya" }
+                            else{ item["type"] = "Klasör" }
+                            // item.no
+                            webix.ajax().get("/docs_counter",function(t,x,x){
+                                item.no = t
+                                // item.path & item.url & item.dir_tree
+                                console.log(item)
+                                webix.ajax().get("/docs_path_url",item,function(t,x,x){
+                                    item.path = JSON.parse(t).path
+                                    item.url = JSON.parse(t).url
+                                    $$("table").add(item);
+                                    $$("table").sort("no","desc","int");
+                                    $$("addEntryClearFilesButton").callEvent("onItemClick")
+                                    if(item.type=="Klasör") webix.ajax().get("/docs_extract_dirtree",item,function(t,x,x){})
+                                        })
+                            })
+
+                            console.log(item)
+
+                            /*webix.ajax().post("/docs",item, function(text,xml,xhr){
+								item["no"] = text
+								$$("table").load("/docs",function(){$$("table").filterByAll()})
+								$$("addDetailsProperty1").setValues({})
+								$$("addDetailsProperty2").setValues({})
+								$$("addDetailsExplanation").setValue("")
+							});*/
+                        }},
+                    ],
+                }
+
+                //===================================================================
+                // Layout
+                //===================================================================
+                /*---------------------------------------------------------
+				 	Layout:Table
+				---------------------------------------------------------*/
+                var tableLayout = {
+                    id:"tableLayout",
+                    view:"layout",
+                    rows:[
+                        projectSelectToolbar,
+                        subProjectSelectToolbar,
+                        categorySelectToolbar,
+                        subCategorySelectToolbar,
+                        table,
+                        {cols:[detailsProperty1,detailsProperty2,detailsProperty3]}
+                    ],
+                    gravity:2,
+                }
+
+                var detailsLayout = {
+                    multi:false,
+                    id:"detailsLayout",
+                    view:"accordion",
+                    cols:[
+                        {id:"previewAccordionItem", header:"Önizleme", body:previewLayout, collapsed:false},
+                        {id:"addAccordionItem", header:"Ekle", body:addDetailsLayout, collapsed:true},
+                    ],
+                    gravity:1,
+                }
+
+                app = webix.ui({cols:[tableLayout,detailsLayout,]})
+                $$("detailsProperty1").bind("table")
+                $$("detailsProperty2").bind("table")
+
+
+            });
+        </script>
+    </body>
+</html>																														
