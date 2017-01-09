@@ -108,10 +108,35 @@
 				css3: true
 			});
 		});
-
-		webix.ready(function(){
-			webix.message("Webix initialized")
-		})
+webix.ready(function(){
+webix.ui({
+		container:"header",
+		view:"toolbar",
+		elements: [{},
+				{ view:"button", width:100},
+				{ view:"segmented", width: 270, options:[
+					{id:"create", value:"Create"},
+					{id:"edit", value:"Edit"},
+					{id:"delete", value:"Delete"}
+					] 
+				},
+				{view:"text", label:"text"},
+				{view:"select", label:"Select", width:200, options:[
+					{id:"create", value:"Create New Tab"},
+					{id:"edit", value:"Edit Tab"},
+					{id:"delete", value:"Delete Tab"}
+					]
+				},{}
+			],
+		elementsConfig:{
+			width: 150,
+			labelAlign:"right",
+			value:"edit"},
+		css:{"margin":"auto"},
+		width:document.body.clientWidth,
+		height:70,
+	});	
+});
 	</script>
 
 </head>
@@ -123,7 +148,8 @@
 <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
 
 
-<div id="header"><span style="color:red">Hakkımızda</span><i class="fa fa-twitter-square fa-3x" aria-hidden="true" style="align:right;"></i></div>
+<div id="header"></div>
+<!-- id="header"><span style="color:red">Hakkımızda</span><i class="fa fa-twitter-square fa-3x" aria-hidden="true" style="align:right;"></i></div>-->
 <div id="footer">İletişim</div>
 
 <div id="fullpage">
