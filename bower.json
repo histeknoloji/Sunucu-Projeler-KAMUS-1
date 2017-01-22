@@ -21,6 +21,7 @@
     "gridster": "^0.5.6",
     "jquery": "^3.1.1",
     "masonry": "^4.1.1",
-    "fullpage.js": "^2.9.2"
+    "fullpage.js": "^2.9.2",
+    "font-awesome-old-3.1.1": "font-awesome#3.1.1"
   }
 }
