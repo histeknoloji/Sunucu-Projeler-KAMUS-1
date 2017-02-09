@@ -1,268 +1,235 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>His Teknoloji</title>
+  <head>
+    <title>His Teknoloji</title>
 
-        <!-- Webix -->
-        <link rel="stylesheet" href="/webix/codebase/skins/compact.css" type="text/css" charset="utf-8">
-        <script src="/webix/codebase/webix.js" type="text/javascript" charset="utf-8"></script>
-        <!-- Font Awesome -->
-        <link rel='stylesheet prefetch' href='/font-awesome-old-3.1.1/build/assets/font-awesome/css/font-awesome.css'>
-        <!-- JQuery -->
-        <script src="/jquery/dist/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+    <!-- Webix -->
+    <link rel="stylesheet" href="/webix/codebase/skins/compact.css" type="text/css" charset="utf-8">
+    <script src="/webix/codebase/webix.js" type="text/javascript" charset="utf-8"></script>
+    <!-- Font Awesome -->
+    <link rel='stylesheet prefetch' href='/font-awesome-old-3.1.1/build/assets/font-awesome/css/font-awesome.css'>
+    <!-- JQuery -->
+    <script src="/jquery/dist/jquery.min.js" type="text/javascript" charset="utf-8"></script>
 
-    </head>
-    <body>
 
-        <style>
-            .header{
-                height: 100px;
-                width: 100%;
-                background: #83C3C5;/*url(http://hairforkeeps.com/wp-content/uploads/2013/06/BG_BarW.png) 0px 0px/100% 100%/*, linear-gradient(to right,rgb(11,82,215),rgb(11,82,215)) 180px 0px/100% 100%*/;
+  </head>
+  <body>
 
-                /*background-size: auto 100%;*/
-                background-repeat: no-repeat;
-                /*background-size: 100% 100%;*/
-            }
-            .footer{
-                height: 60px;
-                width: 100%;
-                background:  #83C3C5;/*url(http://spellclimatizacao.com.br/images/background/footer-pattern.jpg) 0px 0px/100% 100%;*/
-                /*background-size: contain;*/
-                /*background-size: auto 100%;*/
-                background-repeat: no-repeat;
-                /*background-size: 100% 100%;*/
-                position:fixed;
-                bottom:0;
-            }
-            .main{
-                height: 100%;
-                width: 100%;
-                background:  #83C3C5;/*url(http://spellclimatizacao.com.br/images/background/footer-pattern.jpg) 0px 0px/100% 100%;*/
-                /*background-size: contain;*/
-                /*background-size: auto 100%;*/
-                /*background-repeat: no-repeat;*/
-                /*background-size: 100% 100%;*/
-                position:center;
-                /*bottom:0;*/
-            }
+    <style>
+      .header{
+        height: 100px;
+        width: 100%;
+        background: #83C3C5;
+        background-repeat: no-repeat;
+      }
+      .footer{
+        height: 60px;
+        width: 100%;
+        background:  #83C3C5;
+        background-repeat: no-repeat;
+        position:fixed;
+        bottom:0;
+      }
+      .main{
+        height: calc(100% - 160px);
+        width: 100%;
+        background:  #83C3C5;
+        position:center;
+      }
 
-            /* Social media icons */
-            .icon-youtube:before {
-                content: "\f167";
-            }
+      /* Header - Social media icons */
+      .icon-youtube:before {
+        content: "\f167";
+      }
 
-            .icon-social {
-                background-color: white;
-                border-radius: 3.6rem;
-                cursor: pointer;
-                display: inline-block;
-                font-size: 2.0rem;
-                height: 3.6rem;
-                line-height: 3.6rem;
-                margin: 0 5px;
-                position: relative;
-                text-align: center;
-                -webkit-user-select: none;
-                -moz-user-select: none;
-                -ms-user-select: none;
-                user-select: none;
-                width: 3.6rem;
-            }
+      .icon-social {
+        background-color: white;
+        border-radius: 3.6rem;
+        cursor: pointer;
+        display: inline-block;
+        font-size: 2.0rem;
+        height: 3.6rem;
+        line-height: 3.6rem;
+        margin: 0 5px;
+        position: relative;
+        text-align: center;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        width: 3.6rem;
+      }
 
-            /* Circle */
-            .icon-social span {
-                border-radius: 0;
-                display: block;
-                height: 0;
-                left: 50%;
-                margin: 0;
-                position: absolute;
-                top: 50%;
-                -webkit-transition: all 0.3s;
-                -moz-transition: all 0.3s;
-                -o-transition: all 0.3s;
-                transition: all 0.3s;
-                width: 0;
-            }
-            .icon-social:hover span {
-                width: 3.6rem;
-                height: 3.6rem;
-                border-radius: 3.6rem;
-                margin: -1.8rem;
-            }
-            .twitter span {
-                background-color: #4099ff;
-            }
-            .facebook span {
-                background-color: #3B5998;
-            }
-            .youtube span {
-                background-color: #db5a3c;
-            }
+      /* Circle */
+      .icon-social span {
+        border-radius: 0;
+        display: block;
+        height: 0;
+        left: 50%;
+        margin: 0;
+        position: absolute;
+        top: 50%;
+        -webkit-transition: all 0.3s;
+        -moz-transition: all 0.3s;
+        -o-transition: all 0.3s;
+        transition: all 0.3s;
+        width: 0;
+      }
+      .icon-social:hover span {
+        width: 3.6rem;
+        height: 3.6rem;
+        border-radius: 3.6rem;
+        margin: -1.8rem;
+      }
+      .twitter span {
+        background-color: #4099ff;
+      }
+      .facebook span {
+        background-color: #3B5998;
+      }
+      .youtube span {
+        background-color: #db5a3c;
+      }
 
-            /* Icons */
-            .icon-social i {
-                background: none;
-                color: white;
-                height: 3.6rem;
-                left: 0;
-                line-height: 3.6rem;
-                position: absolute;
-                top: 0;
-                -webkit-transition: all 0.3s;
-                -moz-transition: all 0.3s;
-                -o-transition: all 0.3s;
-                transition: all 0.3s;
-                width: 3.6rem;
-                z-index: 10;
-            }
-            .icon-social .icon-twitter {
-                color: #4099ff;
-            }
-            .icon-social .icon-facebook {
-                color: #3B5998;
-            }
-            .icon-social .icon-youtube {
-                color: #db5a3c;
-            }
-            .icon-social:hover .icon-twitter,
-            .icon-social:hover .icon-facebook,
-            .icon-social:hover .icon-youtube {
-                color: white;
-            }
+      /* Icons */
+      .icon-social i {
+        background: none;
+        color: white;
+        height: 3.6rem;
+        left: 0;
+        line-height: 3.6rem;
+        position: absolute;
+        top: 0;
+        -webkit-transition: all 0.3s;
+        -moz-transition: all 0.3s;
+        -o-transition: all 0.3s;
+        transition: all 0.3s;
+        width: 3.6rem;
+        z-index: 10;
+      }
+      .icon-social .icon-twitter {
+        color: #4099ff;
+      }
+      .icon-social .icon-facebook {
+        color: #3B5998;
+      }
+      .icon-social .icon-youtube {
+        color: #db5a3c;
+      }
+      .icon-social:hover .icon-twitter,
+      .icon-social:hover .icon-facebook,
+      .icon-social:hover .icon-youtube {
+        color: white;
+      }
 
-            /* Contact icons */
-            .icon-phone:before {
-                content: "\f095";
-            }            
-            .icon-map-marker:before {
-                content: "\f041";
-            }
-            .icon-contact {
-                background-color: #83C3C5;
-                cursor: pointer;
-                display: inline-block;
-                font-size: 2.0rem;
-                height: 3.6rem;
-                line-height: 3.6rem;
-                margin: 0 5px;
-                position: relative;
-                text-align: center;
-                -webkit-user-select: none;
-                -moz-user-select: none;
-                -ms-user-select: none;
-                user-select: none;
-                width: 3.6rem;
-            }
-            /* Circle */
-            .icon-contact span {
-                border-radius: 0;
-                display: block;
-                height: 0;
-                left: 50%;
-                margin: 0;
-                position: absolute;
-                top: 50%;
-                -webkit-transition: all 0.3s;
-                -moz-transition: all 0.3s;
-                -o-transition: all 0.3s;
-                transition: all 0.3s;
-                width: 0;
-            }
-            /*.icon-contact:hover span {
-            width: 3.6rem;
-            height: 3.6rem;
-            border-radius: 3.6rem;
-            margin: -1.8rem;
-            }*/
-            .phone span {
-                background-color: green;
-            }
-            .map-marker span {
-                background-color: green;
-            } 
+      /* Contact icons */
+      .icon-phone:before {
+        content: "\f095";
+      }            
+      .icon-map-marker:before {
+        content: "\f041";
+      }
+      .icon-contact {
+        background-color: #83C3C5;
+        cursor: pointer;
+        display: inline-block;
+        font-size: 2.0rem;
+        height: 3.6rem;
+        line-height: 3.6rem;
+        margin: 0 5px;
+        position: relative;
+        text-align: center;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        width: 3.6rem;
+      }
+      /* Circle */
+      .icon-contact span {
+        border-radius: 0;
+        display: block;
+        height: 0;
+        left: 50%;
+        margin: 0;
+        position: absolute;
+        top: 50%;
+        -webkit-transition: all 0.3s;
+        -moz-transition: all 0.3s;
+        -o-transition: all 0.3s;
+        transition: all 0.3s;
+        width: 0;
+      }
+      /*.icon-contact:hover span {
+      width: 3.6rem;
+      height: 3.6rem;
+      border-radius: 3.6rem;
+      margin: -1.8rem;
+      }*/
+      .phone span {
+        background-color: green;
+      }
+      .map-marker span {
+        background-color: green;
+      } 
 
-            .icon-contact i {
-                background: none;
-                color: white;
-                height: 3.6rem;
-                left: 0;
-                line-height: 3.6rem;
-                position: absolute;
-                top: 0;
-                -webkit-transition: all 0.3s;
-                -moz-transition: all 0.3s;
-                -o-transition: all 0.3s;
-                transition: all 0.3s;
-                width: 3.6rem;
-                z-index: 10;
-            }
-            .icon-contact .icon-phone {
-                color: green;
-            }
-            .icon-contact .icon-map-marker {
-                color: green;
-            }
-            /*.icon-contact:hover .icon-phone,
-            .icon-contact:hover .icon-map-marker {
-            color: white;
-            }*/
+      .icon-contact i {
+        background: none;
+        color: white;
+        height: 3.6rem;
+        left: 0;
+        line-height: 3.6rem;
+        position: absolute;
+        top: 0;
+        -webkit-transition: all 0.3s;
+        -moz-transition: all 0.3s;
+        -o-transition: all 0.3s;
+        transition: all 0.3s;
+        width: 3.6rem;
+        z-index: 10;
+      }
+      .icon-contact .icon-phone {
+        color: green;
+      }
+      .icon-contact .icon-map-marker {
+        color: green;
+      }
+      /*.icon-contact:hover .icon-phone,
+      .icon-contact:hover .icon-map-marker {
+      color: white;
+      }*/
 
-            .image .webix_template{
-                padding:0px;
-            }
+      .image .webix_template{
+        padding:0px;
+      }
 
-        </style>
-        <div id="header" class="header">
-            <div style="height:15px"></div>
-            <div style="text-align:right; border:none;float:right;margin-right:10%;">
-                <a id="twitter" href="http://twitter.com/histeknoloji" class="icon-social twitter"><i class="icon-twitter"></i><span></span></a>
-                <a href="http://facebook.com" class="icon-social facebook"><i class="icon-facebook"></i><span></span></a>
-                <a href="http://facebook.com" class="icon-social youtube"><i class="icon-youtube"></i><span></span></a>
-            </div>
-        </div>
-        <div id="footer" class="footer">
-            <div id=contact style="border:none;text-align:center;position:relative;transition-property: all;-webkit-transition-duration: 0.3s;">
-                <a id="phone" style="" class="icon-contact phone"><i class="icon-phone"></i><span></span></a>
-                <a id="address" href="http://facebook.com" class="icon-contact map-marker"><i class="icon-map-marker"></i><span></span></a>  
-            </div>  
-        </div>
+    </style>
 
-        <div id="main" class="main">
+    <div id="header" class="header">
+      <div style="height:15px"></div>
+      <div style="text-align:right; border:none;float:right;margin-right:10%;">
+        <a id="twitter" href="http://twitter.com/histeknoloji" class="icon-social twitter"><i class="icon-twitter"></i><span></span></a>
+        <a href="http://facebook.com" class="icon-social facebook"><i class="icon-facebook"></i><span></span></a>
+        <a href="http://facebook.com" class="icon-social youtube"><i class="icon-youtube"></i><span></span></a>
+      </div>
+    </div>
 
-        </div>        
+    <div id="footer" class="footer">
+      <div id=contact style="border:none;text-align:center;position:relative;transition-property: all;-webkit-transition-duration: 0.3s;">
+        <a id="phone" class="icon-contact phone"><i class="icon-phone"></i><span></span></a>
+        <a id="address" href="http://facebook.com" class="icon-contact map-marker"><i class="icon-map-marker"></i><span></span></a>  
+      </div>  
+    </div>
 
-        <script type="text/javascript" charset="utf-8">
-            webix.ready(function(){
-                webix.ui.fullScreen();
-                app = webix.ui({
-                    rows:[
-                        {view:"htmlform", template:"html->header"},
-                        /*{id:"header", view:"toolbar", height:60, elements:[
-                            {view:"urlform", label:"<span style='font-size:35px'>Hakkımızda</span>", align:"center"},
-                            {view:"button", label:"twitter", width:15, align:"right"},
-                        ]},*/
-                        {id:"body", view:"multiview", container:"main", cols:[
-                            {view:"carousel", id:"carousel", width:464, height:275, cols:[
-                                 {css:"image", template:img, data:{src:"resimler/header-background.jpg"}},
-                                 {}
-                             ]},
-                            /*{id:"header", view:"toolbar", elements:[
-                            {view:"button", label:"phone"},
-                            {view:"button", label:"addres"},
-                        ]},*/
-                            //{},
-                            {view:"htmlform", template:"html->footer"},
-                        ]                       
-                        });
-                        });
+    <div id="main" class="main">Deneme</div>
 
-                        document.getElementById("phone").onclick = function(e){
-                        $('#contact').css({'text-indent':String(-$(window).width()/2+$("#phone").width()+10)+"px"});
-                        $('#address').hide("slow");
-                        }
+    <script type="text/javascript" charset="utf-8">
 
-        </script>
-    </body>
+      document.getElementById("phone").onclick = function(e){
+        $('#contact').css({'text-indent':String(-$(window).width()/2+$("#phone").width()+10)+"px"});
+        $('#address').hide("slow");
+      }
+
+    </script>
+  </body>
 </html>

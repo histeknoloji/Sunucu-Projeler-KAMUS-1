@@ -12,7 +12,7 @@
     "tests"
   ],
   "dependencies": {
-    "webix": "^4.0.8",
+    "webix": "^4.1.0",
     "codemirror": "^5.19.0",
     "flow.js": "^2.11.2",
     "moment": "^2.15.2",
@@ -22,6 +22,7 @@
     "jquery": "^3.1.1",
     "masonry": "^4.1.1",
     "fullpage.js": "^2.9.2",
-    "font-awesome-old-3.1.1": "font-awesome#3.1.1"
+    "font-awesome-old-3.1.1": "font-awesome#3.1.1",
+    "slick-carousel": "slick.js#^1.6.0"
   }
 }

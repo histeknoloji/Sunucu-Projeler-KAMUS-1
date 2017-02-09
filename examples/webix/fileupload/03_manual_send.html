@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+	<head>
+        <title>Sending on custom action</title>
+		<link rel="stylesheet" href="/webix/codebase/skins/compact.css" type="text/css" charset="utf-8">
+		<script src="/webix/codebase/webix.js" type="text/javascript" charset="utf-8"></script>
+
+	</head>
+	<body>
+		<div id="uploader_container" style="width: 800px; height: 200px; margin: 40px;"></div>
+		<script type="text/javascript" charset="utf-8">
+		webix.ready(function() {
+			webix.ui({
+				container:"uploader_container",
+				view:"form", rows: [
+					{ 
+						view: "uploader", id:"upl1",
+						autosend:false, value: 'Upload file',
+						link:"mylist",  upload:"/examples/webix/fileupload" 
+					},
+					{
+					 	view:"list",  id:"mylist", type:"uploader",
+						autoheight:true, borderless:true
+					},
+					{ view: "button", label: "Save files", click: function() {
+						$$("upl1").send(function(response){
+							if(response)
+                              	console.log(response)
+								//webix.message(response.status);
+						});
+					}}
+				]
+			});
+
+			/*$$("upl1").attachEvent("onUploadComplete", function(){
+							webix.message("done");
+						});*/
+		});
+		</script>
+	</body>
+</html>

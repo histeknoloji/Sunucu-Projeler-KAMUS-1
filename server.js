@@ -10,7 +10,6 @@ var gitlog = require('gitlog')
 var fs = require("fs")
 const spawn = require('child_process').spawn;
 process.env.TMPDIR = 'tmp'; // to avoid the EXDEV rename error, see http://stackoverflow.com/q/21071303/76173
-var flow = require("@flowjs/flow.js/samples/Node.js/flow-node.js")("tmp")
 var multipart = require('connect-multiparty');
 var multipartMiddleware = multipart();
 
@@ -36,8 +35,8 @@ var MetaInspector = require('node-metainspector')
 //--------------------------------------------------------------------------------------------------------------------------------
 var MongoClient = require('mongodb').MongoClient;
 var MongoObjectID = require('mongodb').ObjectID;
-//var mongodbUrl = 'mongodb://hsyn:03014123@139.59.156.195:27017/kamus';
-var mongodbUrl = 'mongodb://127.0.0.1:27017/kamus';
+var mongodbUrl = 'mongodb://his:%25Sdf1234@127.0.0.1:27017/kamus';
+//var mongodbUrl = 'mongodb://127.0.0.1:27017/kamus';
 
 /*===========================================================================
 	Prototypes 
@@ -116,6 +115,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'bower_components')));
 app.use(express.static(path.join(__dirname, 'tmp')));
 app.use(express.static(path.join(__dirname, 'test')));
+app.use(express.static(path.join(__dirname, 'examples')));
 
 //parse POST data
 app.use(bodyParser.json());
@@ -182,58 +182,7 @@ app.get('/upload/download/:identifier', function(req, res) {
 /*-----------------------------------------------------------------------------
 	Upload file with "Flow.js"
 -----------------------------------------------------------------------------*/
-process.env.TMPDIR = 'tmp'; // to avoid the EXDEV rename error, see http://stackoverflow.com/q/21071303/76173
 
-// Configure access control allow origin header stuff
-var ACCESS_CONTROLL_ALLOW_ORIGIN = true;
-/*
-// Handle uploads through Flow.js
-app.post('/upload', multipartMiddleware, function(req, res) {
-	flow.post(req, function(status, filename, original_filename, identifier) {
-		console.log('POST', status, original_filename, identifier);
-		if (ACCESS_CONTROLL_ALLOW_ORIGIN) {
-			res.header("Access-Control-Allow-Origin", "*");
-		}
-		if (status == 'done' ||status == 'partly_done') {
-			status = 200;
-		}
-		res.status(status).send();
-	});
-});
-
-
-app.options('/upload', function(req, res){
-	console.log('OPTIONS');
-	if (ACCESS_CONTROLL_ALLOW_ORIGIN) {
-		res.header("Access-Control-Allow-Origin", "*");
-	}
-	res.status(200).send();
-});
-
-// Handle status checks on chunks through Flow.js
-app.get('/upload', function(req, res) {
-	flow.get(req, function(status, filename, original_filename, identifier) {
-		console.log('GET', status);
-		if (ACCESS_CONTROLL_ALLOW_ORIGIN) {
-			res.header("Access-Control-Allow-Origin", "*");
-		}
-
-		if (status == 'found') {
-			status = 200;
-		} else {
-			status = 204;
-		}
-
-		res.status(status).send();
-	});
-});
-
-app.get('/download', function(req, res) {
-	console.log(req.query)
-	var file = fs.createWriteStream('tmp/'+req.query.path)
-	flow.write(req.query.identifier, file, {onDone:flow.clean});
-});
-*/
 
 app.post('/raspi', function(req, res){
     console.log("POST: /raspi")
@@ -421,6 +370,38 @@ app.get('/belgeler', function(req, res){
             db.close()
         })
     })
+});
+
+/*===========================================================================
+	KAMUS - Bağlantılar
+===========================================================================*/
+app.get('/tdedgebze/kitaplik', function(req, res){
+    console.log("GET: /tdedgebze/kitaplik")
+    MongoClient.connect(mongodbUrl, function(err, db) {
+        db.collection('tdedgebze_kitaplik').find(req.query).toArray(function(err,data){
+            for (var i = 0; i < data.length; i++){
+                data[i].id = data[i]._id
+                delete data[i]._id
+                //var today = new Date()
+                //var lastvisit = new Date(data[i].lastvisit)
+                //data[i].pastvis = data[i].period-((today.getTime()-lastvisit.getTime())/86400000).toFixed(0)
+                data[i].no = i+1
+            }
+            res.send(data);
+            db.close()
+        })
+    })		
+});
+
+app.post('/tdedgebze/kitaplik', function(req, res){
+    console.log("POST: /tdedgebze/kitaplik")
+    MongoClient.connect(mongodbUrl, function(err, db) {
+        db.collection('tdedgebze_kitaplik').insertOne(req.body,function(err){
+            if (err) return res.send({ status:"error" });
+            res.send({});
+            db.close()
+        })
+    })		
 });
 
 /*
@@ -701,3 +682,91 @@ app.get('/dropbox_uploaded_files', function(req, res){
 		res.send({"items":message})
 	});
 });*/
+
+/*===========================================================================
+	Examples
+===========================================================================*/
+
+//-----------------------------------------------------------------------------------------------------------------------
+//	Webix File Upload
+//-----------------------------------------------------------------------------------------------------------------------
+var fileUpload = require('express-fileupload');
+app.use(fileUpload());
+
+app.post('/examples/webix/fileupload', function(req, res){
+  var sampleFile;
+  if (!req.files) {
+    res.send('No files were uploaded.');
+    return;
+  }
+
+  // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file 
+  sampleFile = req.files.upload;
+
+  // Use the mv() method to place the file somewhere on your server 
+  sampleFile.mv('examples/webix/fileupload/tmp/'+sampleFile.name, function(err) {
+    if (err) {
+      res.status({status:'error'});
+    }
+    else {
+      res.send({status:'server'});
+    }
+  });
+});
+
+//-----------------------------------------------------------------------------------------------------------------------
+//	Flow.js
+//-----------------------------------------------------------------------------------------------------------------------
+var flow = require("@flowjs/flow.js/samples/Node.js/flow-node.js")("tmp")
+process.env.TMPDIR = 'tmp';
+
+// Configure access control allow origin header stuff
+var ACCESS_CONTROLL_ALLOW_ORIGIN = true;
+
+// Handle uploads through Flow.js
+app.post('/examples/flowjs/upload', multipartMiddleware, function(req, res) {
+	flow.post(req, function(status, filename, original_filename, identifier) {
+		console.log('POST', status, original_filename, identifier);
+		if (ACCESS_CONTROLL_ALLOW_ORIGIN) {
+			res.header("Access-Control-Allow-Origin", "*");
+		}
+		if (status == 'done' ||status == 'partly_done') {
+			status = 200;
+		}
+		res.status(status).send();
+	});
+});
+
+/*
+app.options('/upload', function(req, res){
+	console.log('OPTIONS');
+	if (ACCESS_CONTROLL_ALLOW_ORIGIN) {
+		res.header("Access-Control-Allow-Origin", "*");
+	}
+	res.status(200).send();
+});
+
+// Handle status checks on chunks through Flow.js
+app.get('/upload', function(req, res) {
+	flow.get(req, function(status, filename, original_filename, identifier) {
+		console.log('GET', status);
+		if (ACCESS_CONTROLL_ALLOW_ORIGIN) {
+			res.header("Access-Control-Allow-Origin", "*");
+		}
+
+		if (status == 'found') {
+			status = 200;
+		} else {
+			status = 204;
+		}
+
+		res.status(status).send();
+	});
+});
+
+app.get('/download', function(req, res) {
+	console.log(req.query)
+	var file = fs.createWriteStream('tmp/'+req.query.path)
+	flow.write(req.query.identifier, file, {onDone:flow.clean});
+});
+*/
