@@ -1,235 +1,238 @@
 <!DOCTYPE html>
-<html>
-  <head>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
     <title>His Teknoloji</title>
 
-    <!-- Webix -->
-    <link rel="stylesheet" href="/webix/codebase/skins/compact.css" type="text/css" charset="utf-8">
-    <script src="/webix/codebase/webix.js" type="text/javascript" charset="utf-8"></script>
-    <!-- Font Awesome -->
-    <link rel='stylesheet prefetch' href='/font-awesome-old-3.1.1/build/assets/font-awesome/css/font-awesome.css'>
-    <!-- JQuery -->
-    <script src="/jquery/dist/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+    <!-- Bootstrap Core CSS -->
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 
+    <!-- Custom Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Catamaran:100,200,300,400,500,600,700,800,900" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Muli" rel="stylesheet">
 
-  </head>
-  <body>
+    <!-- Plugin CSS -->
+    <link rel="stylesheet" href="vendor/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="vendor/simple-line-icons/css/simple-line-icons.css">
+    <link rel="stylesheet" href="vendor/device-mockups/device-mockups.min.css">
 
-    <style>
-      .header{
-        height: 100px;
-        width: 100%;
-        background: #83C3C5;
-        background-repeat: no-repeat;
-      }
-      .footer{
-        height: 60px;
-        width: 100%;
-        background:  #83C3C5;
-        background-repeat: no-repeat;
-        position:fixed;
-        bottom:0;
-      }
-      .main{
-        height: calc(100% - 160px);
-        width: 100%;
-        background:  #83C3C5;
-        position:center;
-      }
+    <!-- Theme CSS -->
+    <link href="css/new-age.min.css" rel="stylesheet">
 
-      /* Header - Social media icons */
-      .icon-youtube:before {
-        content: "\f167";
-      }
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
 
-      .icon-social {
-        background-color: white;
-        border-radius: 3.6rem;
-        cursor: pointer;
-        display: inline-block;
-        font-size: 2.0rem;
-        height: 3.6rem;
-        line-height: 3.6rem;
-        margin: 0 5px;
-        position: relative;
-        text-align: center;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-        width: 3.6rem;
-      }
+</head>
 
-      /* Circle */
-      .icon-social span {
-        border-radius: 0;
-        display: block;
-        height: 0;
-        left: 50%;
-        margin: 0;
-        position: absolute;
-        top: 50%;
-        -webkit-transition: all 0.3s;
-        -moz-transition: all 0.3s;
-        -o-transition: all 0.3s;
-        transition: all 0.3s;
-        width: 0;
-      }
-      .icon-social:hover span {
-        width: 3.6rem;
-        height: 3.6rem;
-        border-radius: 3.6rem;
-        margin: -1.8rem;
-      }
-      .twitter span {
-        background-color: #4099ff;
-      }
-      .facebook span {
-        background-color: #3B5998;
-      }
-      .youtube span {
-        background-color: #db5a3c;
-      }
+<body id="page-top">
 
-      /* Icons */
-      .icon-social i {
-        background: none;
-        color: white;
-        height: 3.6rem;
-        left: 0;
-        line-height: 3.6rem;
-        position: absolute;
-        top: 0;
-        -webkit-transition: all 0.3s;
-        -moz-transition: all 0.3s;
-        -o-transition: all 0.3s;
-        transition: all 0.3s;
-        width: 3.6rem;
-        z-index: 10;
-      }
-      .icon-social .icon-twitter {
-        color: #4099ff;
-      }
-      .icon-social .icon-facebook {
-        color: #3B5998;
-      }
-      .icon-social .icon-youtube {
-        color: #db5a3c;
-      }
-      .icon-social:hover .icon-twitter,
-      .icon-social:hover .icon-facebook,
-      .icon-social:hover .icon-youtube {
-        color: white;
-      }
+    <nav id="mainNav" class="navbar navbar-default navbar-fixed-top">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span> Menu <i class="fa fa-bars"></i>
+                </button>
+                <a class="navbar-brand page-scroll" href="#page-top"><i>His Teknoloji</i></a>
+            </div>
 
-      /* Contact icons */
-      .icon-phone:before {
-        content: "\f095";
-      }            
-      .icon-map-marker:before {
-        content: "\f041";
-      }
-      .icon-contact {
-        background-color: #83C3C5;
-        cursor: pointer;
-        display: inline-block;
-        font-size: 2.0rem;
-        height: 3.6rem;
-        line-height: 3.6rem;
-        margin: 0 5px;
-        position: relative;
-        text-align: center;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-        width: 3.6rem;
-      }
-      /* Circle */
-      .icon-contact span {
-        border-radius: 0;
-        display: block;
-        height: 0;
-        left: 50%;
-        margin: 0;
-        position: absolute;
-        top: 50%;
-        -webkit-transition: all 0.3s;
-        -moz-transition: all 0.3s;
-        -o-transition: all 0.3s;
-        transition: all 0.3s;
-        width: 0;
-      }
-      /*.icon-contact:hover span {
-      width: 3.6rem;
-      height: 3.6rem;
-      border-radius: 3.6rem;
-      margin: -1.8rem;
-      }*/
-      .phone span {
-        background-color: green;
-      }
-      .map-marker span {
-        background-color: green;
-      } 
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a class="page-scroll" href="#download">Download</a>
+                    </li>
+                    <li>
+                        <a class="page-scroll" href="#features">Features</a>
+                    </li>
+                    <li>
+                        <a class="page-scroll" href="#contact">Contact</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container-fluid -->
+    </nav>
 
-      .icon-contact i {
-        background: none;
-        color: white;
-        height: 3.6rem;
-        left: 0;
-        line-height: 3.6rem;
-        position: absolute;
-        top: 0;
-        -webkit-transition: all 0.3s;
-        -moz-transition: all 0.3s;
-        -o-transition: all 0.3s;
-        transition: all 0.3s;
-        width: 3.6rem;
-        z-index: 10;
-      }
-      .icon-contact .icon-phone {
-        color: green;
-      }
-      .icon-contact .icon-map-marker {
-        color: green;
-      }
-      /*.icon-contact:hover .icon-phone,
-      .icon-contact:hover .icon-map-marker {
-      color: white;
-      }*/
+    <header>
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-7">
+                    <div class="header-content">
+                        <div class="header-content-inner">
+                            <h1>New Age is an app landing page that will help you beautifully showcase your new mobile app, or anything else!</h1>
+                            <a href="#download" class="btn btn-outline btn-xl page-scroll">Start Now for Free!</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-5">
+                    <div class="device-container">
+                        <div class="device-mockup iphone6_plus portrait white">
+                            <div class="device">
+                                <div class="screen">
+                                    <!-- Demo image for screen mockup, you can put an image here, some HTML, an animation, video, or anything else! -->
+                                    <img src="img/demo-screen-1.jpg" class="img-responsive" alt="">
+                                </div>
+                                <div class="button">
+                                    <!-- You can hook the "home button" to some JavaScript events or just remove it -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
 
-      .image .webix_template{
-        padding:0px;
-      }
+    <section id="download" class="download bg-primary text-center">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2">
+                    <h2 class="section-heading">Discover what all the buzz is about!</h2>
+                    <p>Our app is available on any mobile device! Download now to get started!</p>
+                    <div class="badges">
+                        <a class="badge-link" href="#"><img src="img/google-play-badge.svg" alt=""></a>
+                        <a class="badge-link" href="#"><img src="img/app-store-badge.svg" alt=""></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    </style>
+    <section id="features" class="features">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <div class="section-heading">
+                        <h2>Unlimited Features, Unlimited Fun</h2>
+                        <p class="text-muted">Check out what you can do with this app theme!</p>
+                        <hr>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="device-container">
+                        <div class="device-mockup iphone6_plus portrait white">
+                            <div class="device">
+                                <div class="screen">
+                                    <!-- Demo image for screen mockup, you can put an image here, some HTML, an animation, video, or anything else! -->
+                                    <img src="img/demo-screen-1.jpg" class="img-responsive" alt=""> </div>
+                                <div class="button">
+                                    <!-- You can hook the "home button" to some JavaScript events or just remove it -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="feature-item">
+                                    <i class="icon-screen-smartphone text-primary"></i>
+                                    <h3>Device Mockups</h3>
+                                    <p class="text-muted">Ready to use HTML/CSS device mockups, no Photoshop required!</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="feature-item">
+                                    <i class="icon-camera text-primary"></i>
+                                    <h3>Flexible Use</h3>
+                                    <p class="text-muted">Put an image, video, animation, or anything else in the screen!</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="feature-item">
+                                    <i class="icon-present text-primary"></i>
+                                    <h3>Free to Use</h3>
+                                    <p class="text-muted">As always, this theme is free to download and use for any purpose!</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="feature-item">
+                                    <i class="icon-lock-open text-primary"></i>
+                                    <h3>Open Source</h3>
+                                    <p class="text-muted">Since this theme is MIT licensed, you can use it commercially!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </section>
 
-    <div id="header" class="header">
-      <div style="height:15px"></div>
-      <div style="text-align:right; border:none;float:right;margin-right:10%;">
-        <a id="twitter" href="http://twitter.com/histeknoloji" class="icon-social twitter"><i class="icon-twitter"></i><span></span></a>
-        <a href="http://facebook.com" class="icon-social facebook"><i class="icon-facebook"></i><span></span></a>
-        <a href="http://facebook.com" class="icon-social youtube"><i class="icon-youtube"></i><span></span></a>
-      </div>
-    </div>
+    <section class="cta">
+        <div class="cta-content">
+            <div class="container">
+                <h2>Stop waiting.<br>Start building.</h2>
+                <a href="#contact" class="btn btn-outline btn-xl page-scroll">Let's Get Started!</a>
+            </div>
+        </div>
+        <div class="overlay"></div>
+    </section>
 
-    <div id="footer" class="footer">
-      <div id=contact style="border:none;text-align:center;position:relative;transition-property: all;-webkit-transition-duration: 0.3s;">
-        <a id="phone" class="icon-contact phone"><i class="icon-phone"></i><span></span></a>
-        <a id="address" href="http://facebook.com" class="icon-contact map-marker"><i class="icon-map-marker"></i><span></span></a>  
-      </div>  
-    </div>
+    <section id="contact" class="contact bg-primary">
+        <div class="container">
+            <h2>We <i class="fa fa-heart"></i> new friends!</h2>
+            <ul class="list-inline list-social">
+                <li class="social-twitter">
+                    <a href="#"><i class="fa fa-twitter"></i></a>
+                </li>
+                <li class="social-facebook">
+                    <a href="#"><i class="fa fa-facebook"></i></a>
+                </li>
+                <li class="social-google-plus">
+                    <a href="#"><i class="fa fa-google-plus"></i></a>
+                </li>
+            </ul>
+        </div>
+    </section>
 
-    <div id="main" class="main">Deneme</div>
+    <footer>
+        <div class="container">
+            <p>&copy; 2016 Start Bootstrap. All Rights Reserved.</p>
+            <ul class="list-inline">
+                <li>
+                    <a href="#">Privacy</a>
+                </li>
+                <li>
+                    <a href="#">Terms</a>
+                </li>
+                <li>
+                    <a href="#">FAQ</a>
+                </li>
+            </ul>
+        </div>
+    </footer>
 
-    <script type="text/javascript" charset="utf-8">
+    <!-- jQuery -->
+    <script src="vendor/jquery/jquery.min.js"></script>
 
-      document.getElementById("phone").onclick = function(e){
-        $('#contact').css({'text-indent':String(-$(window).width()/2+$("#phone").width()+10)+"px"});
-        $('#address').hide("slow");
-      }
+    <!-- Bootstrap Core JavaScript -->
+    <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
 
-    </script>
-  </body>
+    <!-- Plugin JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
+
+    <!-- Theme JavaScript -->
+    <script src="js/new-age.min.js"></script>
+
+</body>
+
 </html>
